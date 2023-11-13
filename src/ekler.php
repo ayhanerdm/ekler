@@ -161,8 +161,8 @@ namespace ayhanerdm
                 } break;
 
                 case 'cokluk': {
-                    if(self::$sonHarf == 'a' || self::$sonHarf == 'ı' || self::$sonHarf == 'o' || self::$sonHarf == 'u') { self::$cekimliEk = 'lar'; }
-                    elseif(self::$sonHarf == 'e' || self::$sonHarf == 'i' || self::$sonHarf == 'ö' || self::$sonHarf == 'ü') { self::$cekimliEk = 'ler'; }
+                    if(self::$sonSesli == 'a' || self::$sonSesli == 'ı' || self::$sonSesli == 'o' || self::$sonSesli == 'u') { self::$cekimliEk = 'lar'; }
+                    elseif(self::$sonSesli == 'e' || self::$sonSesli == 'i' || self::$sonSesli == 'ö' || self::$sonSesli == 'ü') { self::$cekimliEk = 'ler'; }
                     else { self::$cekimliEk = 'lar'; }
                 }
             }
