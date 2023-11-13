@@ -84,6 +84,7 @@ namespace ayhanerdm
         {
             foreach(get_defined_vars() as $key => $val){ self::$$key = $val; }
 
+            self::$isim = $isim;
             self::$isimKucuk = trim(str_replace(self::$buyukHarfler, self::$kucukHarfler, self::$isim));
             self::$sonHarf  = substr(self::$isim, -1);
 
