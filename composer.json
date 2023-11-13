@@ -14,7 +14,7 @@
         }
     ],
     "type": "library",
-    "license": "(To be decided later)",
+    "license": "proprietary",
     "autoload": {
         "psr-4": {
             "ayhanerdm\\": "src/"
