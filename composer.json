@@ -1,0 +1,27 @@
+{
+    "name": "ayhanerdm/ekler",
+    "description": "That's a PHP class to generate possesive suffixes for Turkish names.",
+    "keywords": ["Türkçe","ek","ekler","ad","ad eki","ad ekleri","isim","isim eki","isim ekleri","iyelik","iyelik eki","iyelik ekleri","Turkish","Turkish suffixes","Turkish possesive suffixes","suffixes","possesive suffixes"],
+    "homepage": "https://github.com/ayhanerdm/ekler",
+    "support": {
+        "issues": "https://github.com/ayhanerdm/ekler/issues",
+        "wiki": "https://github.com/ayhanerdm/wiki"
+    },
+    "authors": [
+        {
+            "name": "Ayhan Erdem",
+            "email": "ayhanerdm.code@gmail.com"
+        }
+    ],
+    "type": "library",
+    "license": "(To be decided later)",
+    "autoload": {
+        "psr-4": {
+            "ayhanerdm\\": "src/"
+        }
+    },
+    "minimum-stability": "stable",
+    "require": {
+        "php": ">=8.1"
+    }
+}
