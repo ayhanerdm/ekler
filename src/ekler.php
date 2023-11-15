@@ -166,6 +166,11 @@ namespace ayhanerdm
                     else { self::$cekimliEk = 'lar'; }
                 }
             }
+
+            if(ctype_upper(self::$sonHarf)) {
+                self::$cekimliEk = strtoupper(self::$cekimliEk);
+            }
+
             if(self::$istenenEk != self::YALIN)
             {
                 if(self::$kesme == true) return self::$sonuc = self::$isim."'".self::$cekimliEk;
