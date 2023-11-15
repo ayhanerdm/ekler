@@ -168,7 +168,7 @@ namespace ayhanerdm
             }
 
             if(ctype_upper(self::$sonHarf)) {
-                self::$cekimliEk = strtoupper(self::$cekimliEk);
+                self::$cekimliEk = mb_strtoupper(self::$cekimliEk, 'UTF-8');
             }
 
             if(self::$istenenEk != self::YALIN)
