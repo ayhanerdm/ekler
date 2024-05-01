@@ -12,7 +12,7 @@ echo Ekler::Cekimle('Nursel', \ayhanerdm\Ekler::ILGI, true);
 ````
 ## Example Usage with Explanations
 ````
-/**
+  /**
     * After autoloading the composer autoload file you can simply call the class as:
     */
   use \ayhanerdm\Ekler;
