@@ -2,15 +2,13 @@
 /**
  * @author Ayhan Erdem 
  * @category Class
- * @example /src/Example.php Example usage of this class.
- * @link https://github.com/ayhanerdm/ekler
  * @package ayhanerdm/ekler
- * @todo Add better DocBlock, better documentation.
+ * @example https://github.com/ayhanerdm/ekler#example-usage
+ * @link https://github.com/ayhanerdm/ekler
  */
 namespace ayhanerdm
 {
-    use Exception, InvalidArgumentException;
-    class ekler
+    class Ekler
     {
         const YALIN                 = 'yalın';
 
@@ -39,144 +37,133 @@ namespace ayhanerdm
         const LER                   = self::COKLUK;
         const LAR                   = self::COKLUK;
 
-        const DEFAULT_KESME         = true;
-        const DEFAULT_ISTENEN_EK    = self::YALIN;
+        const DEFAULT_APOSTROPHE         = true;
+        const DEFAULT_REQUESTED_SUFFIX    = self::YALIN;
 
-        private static array $sertSessizler = ['ç', 'f', 'h', 'k', 'p','s', 'ş', 't'];
-        private static array $buyukHarfler = ['A', 'I', 'E', 'İ', 'U','O', 'Ü', 'Ö', 'Ç', 'F', 'H', 'K', 'P', 'S', 'Ş', 'T'];
-        private static array $kucukHarfler = ['a', 'ı', 'e', 'i', 'u','o', 'ü', 'ö', 'ç', 'f', 'h', 'k', 'p', 's', 'ş', 't'];
+        private static array $hardConsonant = ['ç', 'f', 'h', 'k', 'p','s', 'ş', 't'];
+        private static array $uppercases = ['A', 'I', 'E', 'İ', 'U','O', 'Ü', 'Ö', 'Ç', 'F', 'H', 'K', 'P', 'S', 'Ş', 'T'];
+        private static array $lowercases = ['a', 'ı', 'e', 'i', 'u','o', 'ü', 'ö', 'ç', 'f', 'h', 'k', 'p', 's', 'ş', 't'];
 
-        public static bool $kelimeTuru;
+        public static string $name;
+        private static string $nameLowercase;
 
-        public static string $isim;
-        public static string $isimKucuk;
+        private static string $requestedSuffix;
+        private static string $suffix;
 
-        public static string $istenenEk;
-        public static string $cekimliEk;
+        private static bool $apostrophe;
 
-        public static bool $kesme;
+        private static array $vowels;
+        private static string $lastVowel;
+        private static string $lastCharacter;
 
-        public static array $sesliler;
-        public static string $sonSesli;
-        public static string $sonHarf;
+        public static string $result;
 
-        public static string $sonuc;
-
-        /**
-         * Undocumented function
-         *
-         * @param [type] $kesme In order to add single quotation mark before possessive suffix set this argument to true, its default is also true.
-         */
-        public function __construct(bool $kesme = self::DEFAULT_KESME)
+        public function __construct(bool $apostrophe = self::DEFAULT_APOSTROPHE)
         {
             foreach(get_defined_vars() as $key => $val){ self::$$key = $val; }
         }
 
-        /**
-         * Undocumented function
-         *
-         * @param string $isim A string that keeps a proper noun.
-         * @param string $istenenEk Possessive suffix to conjugate.
-         * @param [type] $kesme In order to add single quotation mark before possessive suffix set this argument to true, its default is also true.
-         * @return string
-         */
-        public static function Cekimle(string $isim, string $istenenEk = self::DEFAULT_ISTENEN_EK, bool $kesme = self::DEFAULT_KESME) :string
+        public static function Cekimle(string $name, string $requestedSuffix = self::DEFAULT_REQUESTED_SUFFIX, bool $apostrophe = self::DEFAULT_APOSTROPHE) :string
         {
+            if(!$name || empty($name) || !is_string($name)) {
+                throw new \Exception('First argument of '.__METHOD__.' method must be a string and cannot be empty.');
+                return false;
+            }
+
             foreach(get_defined_vars() as $key => $val){ self::$$key = $val; }
 
-            self::$isim = $isim;
-            self::$isimKucuk = trim(str_replace(self::$buyukHarfler, self::$kucukHarfler, self::$isim));
-            self::$sonHarf  = substr(self::$isim, -1);
+            self::$nameLowercase = trim(str_replace(self::$uppercases, self::$lowercases, self::$name));
+            self::$lastCharacter  = substr(self::$name, -1);
 
-            $bugcheckkaynak = array('ı', 'ö', 'ü');
-            $bugcheckhedef = array('a', '`', '`');
-            $bugfixed = str_replace($bugcheckkaynak, $bugcheckhedef, self::$isimKucuk);
-            preg_match_all('/[aeiou`]/', $bugfixed, $bulunanlar);
-            self::$sesliler = $bulunanlar[0];
-            self::$sonSesli = end(self::$sesliler);
+            preg_match_all(
+                '/[aeiou`]/',
+                str_replace(['ı', 'ö', 'ü'], ['a', '`', '`'], self::$nameLowercase),
+                $found
+            );
+            self::$vowels = $found[0];
+            self::$lastVowel = end(self::$vowels);
 
-            switch(self::$istenenEk)
+            switch(self::$requestedSuffix)
             {
-                case 'yalın': { self::$cekimliEk = ''; } break;
+                case 'yalın': { self::$suffix = ''; } break;
                 case 'in': {
-                    if(self::$sonHarf == 'a' || self::$sonHarf == 'ı'){ self::$cekimliEk = 'nın'; }
-                    elseif(self::$sonHarf == 'e' || self::$sonHarf == 'i'){ self::$cekimliEk = 'nin'; }
-                    elseif(self::$sonHarf == 'u' || self::$sonHarf == 'o'){ self::$cekimliEk = 'nun'; }
-                    elseif(self::$sonHarf == 'ü' || self::$sonHarf == 'ö'){ self::$cekimliEk = 'nün'; }
-                    elseif(self::$sonSesli == 'a' || self::$sonSesli == 'ı'){ self::$cekimliEk = 'ın'; }
-                    elseif(self::$sonSesli == 'e' || self::$sonSesli == 'i'){ self::$cekimliEk = 'in'; }
-                    elseif(self::$sonSesli == 'u' || self::$sonSesli == 'o'){ self::$cekimliEk = 'un'; }
-                    elseif(self::$sonSesli == '`' ) { self::$cekimliEk = 'ün'; }
-                    else{ self::$cekimliEk = 'ın'; }
+                    if(self::$lastCharacter == 'a' || self::$lastCharacter == 'ı'){ self::$suffix = 'nın'; }
+                    elseif(self::$lastCharacter == 'e' || self::$lastCharacter == 'i'){ self::$suffix = 'nin'; }
+                    elseif(self::$lastCharacter == 'u' || self::$lastCharacter == 'o'){ self::$suffix = 'nun'; }
+                    elseif(self::$lastCharacter == 'ü' || self::$lastCharacter == 'ö'){ self::$suffix = 'nün'; }
+                    elseif(self::$lastVowel == 'a' || self::$lastVowel == 'ı'){ self::$suffix = 'ın'; }
+                    elseif(self::$lastVowel == 'e' || self::$lastVowel == 'i'){ self::$suffix = 'in'; }
+                    elseif(self::$lastVowel == 'u' || self::$lastVowel == 'o'){ self::$suffix = 'un'; }
+                    elseif(self::$lastVowel == '`' ) { self::$suffix = 'ün'; }
+                    else{ self::$suffix = 'ın'; }
                 } break;
                 
                 case 'e': {
-                    if(self::$sonHarf == 'a' || self::$sonHarf == 'ı' || self::$sonHarf == 'u' || self::$sonHarf == 'o'){ self::$cekimliEk = 'ya'; }
-                    elseif(self::$sonHarf == 'e' || self::$sonHarf == 'i' || self::$sonHarf == 'ü' || self::$sonHarf == 'ö'){ self::$cekimliEk = 'ye'; }
-                    elseif(self::$sonSesli == 'a' || self::$sonSesli == 'ı' || self::$sonSesli == 'u' || self::$sonSesli == 'o'){ self::$cekimliEk = 'a'; }
-                    elseif(self::$sonSesli == 'e' || self::$sonSesli == 'i' || self::$sonSesli == 'ö' || self::$sonSesli == 'ü'){ self::$cekimliEk = 'e'; }
-                    else{ self::$cekimliEk = 'a'; }
+                    if(self::$lastCharacter == 'a' || self::$lastCharacter == 'ı' || self::$lastCharacter == 'u' || self::$lastCharacter == 'o'){ self::$suffix = 'ya'; }
+                    elseif(self::$lastCharacter == 'e' || self::$lastCharacter == 'i' || self::$lastCharacter == 'ü' || self::$lastCharacter == 'ö'){ self::$suffix = 'ye'; }
+                    elseif(self::$lastVowel == 'a' || self::$lastVowel == 'ı' || self::$lastVowel == 'u' || self::$lastVowel == 'o'){ self::$suffix = 'a'; }
+                    elseif(self::$lastVowel == 'e' || self::$lastVowel == 'i' || self::$lastVowel == 'ö' || self::$lastVowel == 'ü'){ self::$suffix = 'e'; }
+                    else{ self::$suffix = 'a'; }
                 } break;
                 
                 case 'i': {
-                    if(self::$sonHarf == 'a' || self::$sonHarf == 'ı'){ self::$cekimliEk = 'yı'; }
-                    elseif(self::$sonHarf == 'e' || self::$sonHarf == 'i'){ self::$cekimliEk = 'yi'; }
-                    elseif(self::$sonHarf == 'u' || self::$sonHarf == 'o'){ self::$cekimliEk = 'yu'; }
-                    elseif(self::$sonHarf == 'ü' || self::$sonHarf == 'ö'){ self::$cekimliEk = 'yü'; }
-                    elseif(self::$sonSesli == 'a' || self::$sonSesli == 'ı'){ self::$cekimliEk = 'ı'; }
-                    elseif(self::$sonSesli == 'e' || self::$sonSesli == 'i'){ self::$cekimliEk = 'i'; }
-                    elseif(self::$sonSesli == 'u' || self::$sonSesli == 'o'){ self::$cekimliEk = 'u'; }
-                    elseif(self::$sonSesli == '`'){ self::$cekimliEk = 'ü'; }
+                    if(self::$lastCharacter == 'a' || self::$lastCharacter == 'ı'){ self::$suffix = 'yı'; }
+                    elseif(self::$lastCharacter == 'e' || self::$lastCharacter == 'i'){ self::$suffix = 'yi'; }
+                    elseif(self::$lastCharacter == 'u' || self::$lastCharacter == 'o'){ self::$suffix = 'yu'; }
+                    elseif(self::$lastCharacter == 'ü' || self::$lastCharacter == 'ö'){ self::$suffix = 'yü'; }
+                    elseif(self::$lastVowel == 'a' || self::$lastVowel == 'ı'){ self::$suffix = 'ı'; }
+                    elseif(self::$lastVowel == 'e' || self::$lastVowel == 'i'){ self::$suffix = 'i'; }
+                    elseif(self::$lastVowel == 'u' || self::$lastVowel == 'o'){ self::$suffix = 'u'; }
+                    elseif(self::$lastVowel == '`'){ self::$suffix = 'ü'; }
                 } break;
-                    
 
                 case 'de': {
-                    if(self::$sonHarf == 'a' || self::$sonHarf == 'ı' || self::$sonHarf == 'u' || self::$sonHarf == 'o'){ self::$cekimliEk = 'da'; }
-                    elseif(self::$sonHarf == 'e' || self::$sonHarf == 'i' || self::$sonHarf == 'ü' || self::$sonHarf == 'ö'){ self::$cekimliEk = 'de'; }
-                    elseif(in_array(self::$sonHarf , self::$sertSessizler) and (self::$sonSesli == 'a' || self::$sonSesli == 'ı' || self::$sonSesli == 'u' || self::$sonSesli == 'o') ) { self::$cekimliEk = 'ta'; }
-                    elseif(in_array(self::$sonHarf , self::$sertSessizler) and (self::$sonSesli == 'e' || self::$sonSesli == 'i' || self::$sonSesli == 'ü' || self::$sonSesli == 'ö') ) { self::$cekimliEk = 'te'; }
-                    elseif(self::$sonSesli == 'a' || self::$sonSesli == 'ı' || self::$sonSesli == 'u' || self::$sonSesli == 'o'){ self::$cekimliEk = 'da'; }
-                    elseif(self::$sonSesli == 'e' || self::$sonSesli == 'i' || self::$sonSesli == 'ü' || self::$sonSesli == 'ö'){ self::$cekimliEk = 'de'; }
-                    elseif(in_array(self::$sonHarf , self::$sertSessizler)) { self::$cekimliEk = 'ta'; }
-                    else{ self::$cekimliEk = 'da'; }  
+                    if(self::$lastCharacter == 'a' || self::$lastCharacter == 'ı' || self::$lastCharacter == 'u' || self::$lastCharacter == 'o'){ self::$suffix = 'da'; }
+                    elseif(self::$lastCharacter == 'e' || self::$lastCharacter == 'i' || self::$lastCharacter == 'ü' || self::$lastCharacter == 'ö'){ self::$suffix = 'de'; }
+                    elseif(in_array(self::$lastCharacter , self::$hardConsonant) and (self::$lastVowel == 'a' || self::$lastVowel == 'ı' || self::$lastVowel == 'u' || self::$lastVowel == 'o') ) { self::$suffix = 'ta'; }
+                    elseif(in_array(self::$lastCharacter , self::$hardConsonant) and (self::$lastVowel == 'e' || self::$lastVowel == 'i' || self::$lastVowel == 'ü' || self::$lastVowel == 'ö') ) { self::$suffix = 'te'; }
+                    elseif(self::$lastVowel == 'a' || self::$lastVowel == 'ı' || self::$lastVowel == 'u' || self::$lastVowel == 'o'){ self::$suffix = 'da'; }
+                    elseif(self::$lastVowel == 'e' || self::$lastVowel == 'i' || self::$lastVowel == 'ü' || self::$lastVowel == 'ö'){ self::$suffix = 'de'; }
+                    elseif(in_array(self::$lastCharacter , self::$hardConsonant)) { self::$suffix = 'ta'; }
+                    else{ self::$suffix = 'da'; }  
                 } break;        
                 
                 case 'den': {
-                    if(self::$sonHarf == 'a' || self::$sonHarf == 'ı' || self::$sonHarf == 'u' || self::$sonHarf == 'o'){ self::$cekimliEk = 'dan'; }
-                    elseif(self::$sonHarf == 'e' || self::$sonHarf == 'i' || self::$sonHarf == 'ü' || self::$sonHarf == 'ö'){ self::$cekimliEk = 'den'; }
-                    elseif(in_array(self::$sonHarf , self::$sertSessizler) and (self::$sonSesli == 'a' || self::$sonSesli == 'ı' || self::$sonSesli == 'u' || self::$sonSesli == 'o') ) { self::$cekimliEk = 'tan'; }
-                    elseif(in_array(self::$sonHarf , self::$sertSessizler) and (self::$sonSesli == 'e' || self::$sonSesli == 'i' || self::$sonSesli == 'ü' || self::$sonSesli == 'ö') ) { self::$cekimliEk = 'ten'; }
-                    elseif(self::$sonSesli == 'a' || self::$sonSesli == 'ı' || self::$sonSesli == 'u' || self::$sonSesli == 'o'){ self::$cekimliEk = 'dan'; }
-                    elseif(self::$sonSesli == 'e' || self::$sonSesli == 'i' || self::$sonSesli == 'ü' || self::$sonSesli == 'ö'){ self::$cekimliEk = 'den'; }
-                    elseif(in_array(self::$sonHarf , self::$sertSessizler)) { self::$cekimliEk = 'tan'; }
-                    else{ self::$cekimliEk = 'dan'; }
+                    if(self::$lastCharacter == 'a' || self::$lastCharacter == 'ı' || self::$lastCharacter == 'u' || self::$lastCharacter == 'o'){ self::$suffix = 'dan'; }
+                    elseif(self::$lastCharacter == 'e' || self::$lastCharacter == 'i' || self::$lastCharacter == 'ü' || self::$lastCharacter == 'ö'){ self::$suffix = 'den'; }
+                    elseif(in_array(self::$lastCharacter , self::$hardConsonant) and (self::$lastVowel == 'a' || self::$lastVowel == 'ı' || self::$lastVowel == 'u' || self::$lastVowel == 'o') ) { self::$suffix = 'tan'; }
+                    elseif(in_array(self::$lastCharacter , self::$hardConsonant) and (self::$lastVowel == 'e' || self::$lastVowel == 'i' || self::$lastVowel == 'ü' || self::$lastVowel == 'ö') ) { self::$suffix = 'ten'; }
+                    elseif(self::$lastVowel == 'a' || self::$lastVowel == 'ı' || self::$lastVowel == 'u' || self::$lastVowel == 'o'){ self::$suffix = 'dan'; }
+                    elseif(self::$lastVowel == 'e' || self::$lastVowel == 'i' || self::$lastVowel == 'ü' || self::$lastVowel == 'ö'){ self::$suffix = 'den'; }
+                    elseif(in_array(self::$lastCharacter , self::$hardConsonant)) { self::$suffix = 'tan'; }
+                    else{ self::$suffix = 'dan'; }
                 } break;        
                 
                 case 'ile': {
-                    if(self::$sonHarf == 'a' || self::$sonHarf == 'ı' || self::$sonHarf == 'u' || self::$sonHarf == 'o'){ self::$cekimliEk = 'yla'; }
-                    elseif(self::$sonHarf == 'e' || self::$sonHarf == 'i' || self::$sonHarf == 'ü' || self::$sonHarf == 'ö'){ self::$cekimliEk = 'yle'; }
-                    elseif(self::$sonSesli == 'a' || self::$sonSesli == 'ı' || self::$sonSesli == 'u' || self::$sonSesli == 'o'){ self::$cekimliEk = 'la'; }
-                    elseif(self::$sonSesli == 'e' || self::$sonSesli == 'i' || self::$sonSesli == 'ö' || self::$sonSesli == 'ü'){ self::$cekimliEk = 'le'; }
-                    else{ self::$cekimliEk = 'la'; }
+                    if(self::$lastCharacter == 'a' || self::$lastCharacter == 'ı' || self::$lastCharacter == 'u' || self::$lastCharacter == 'o'){ self::$suffix = 'yla'; }
+                    elseif(self::$lastCharacter == 'e' || self::$lastCharacter == 'i' || self::$lastCharacter == 'ü' || self::$lastCharacter == 'ö'){ self::$suffix = 'yle'; }
+                    elseif(self::$lastVowel == 'a' || self::$lastVowel == 'ı' || self::$lastVowel == 'u' || self::$lastVowel == 'o'){ self::$suffix = 'la'; }
+                    elseif(self::$lastVowel == 'e' || self::$lastVowel == 'i' || self::$lastVowel == 'ö' || self::$lastVowel == 'ü'){ self::$suffix = 'le'; }
+                    else{ self::$suffix = 'la'; }
                 } break;
 
                 case 'cokluk': {
-                    if(self::$sonSesli == 'a' || self::$sonSesli == 'ı' || self::$sonSesli == 'o' || self::$sonSesli == 'u') { self::$cekimliEk = 'lar'; }
-                    elseif(self::$sonSesli == 'e' || self::$sonSesli == 'i' || self::$sonSesli == 'ö' || self::$sonSesli == 'ü') { self::$cekimliEk = 'ler'; }
-                    else { self::$cekimliEk = 'lar'; }
+                    if(self::$lastVowel == 'a' || self::$lastVowel == 'ı' || self::$lastVowel == 'o' || self::$lastVowel == 'u') { self::$suffix = 'lar'; }
+                    elseif(self::$lastVowel == 'e' || self::$lastVowel == 'i' || self::$lastVowel == 'ö' || self::$lastVowel == 'ü') { self::$suffix = 'ler'; }
+                    else { self::$suffix = 'lar'; }
                 }
+
+                default: { self::$suffix = ''; self::$apostrophe = false; } break;
             }
 
-            if(ctype_upper(self::$sonHarf)) {
-                self::$cekimliEk = mb_strtoupper(self::$cekimliEk, 'UTF-8');
-            }
+            if(ctype_upper(self::$lastCharacter)) self::$suffix = mb_strtoupper(self::$suffix, 'UTF-8');
 
-            if(self::$istenenEk != self::YALIN)
+            if(self::$requestedSuffix != self::YALIN)
             {
-                if(self::$kesme == true) return self::$sonuc = self::$isim."'".self::$cekimliEk;
-                else return self::$sonuc = self::$isim.self::$cekimliEk;
+                if(self::$apostrophe == true) return self::$result = self::$name."'".self::$suffix;
+                else return self::$result = self::$name.self::$suffix;
             }
-            else return self::$isim;
+            else return self::$name;
         }
     }
 }

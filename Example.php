@@ -1,4 +1,6 @@
 <?php
+    require_once __DIR__.'/src/Ekler.php';
+
     /**
      * After autoloading the composer autoload file you can simply call the class as:
      */
